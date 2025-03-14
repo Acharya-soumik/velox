@@ -1,0 +1,379 @@
+// =============================================
+// Vercel AI SDK Implementation Logic
+// =============================================
+
+import { useChat, useCompletion } from 'ai/react';
+import { streamText, generateObject } from 'ai';
+import { Message } from 'ai';
+
+/**
+ * 1. Chat Implementation with useChat
+ */
+interface UseChatConfig {
+  api: string;
+  id?: string;
+  initialMessages?: Message[];
+  headers?: Record<string, string>;
+  body?: Record<string, unknown>;
+  onResponse?: (response: Response) => void | Promise<void>;
+  onFinish?: (message: Message) => void;
+  onError?: (error: Error) => void;
+}
+
+// Custom Chat Hook
+const useAIChat = (config: UseChatConfig) => {
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    error,
+    append,
+    reload,
+    stop,
+    setMessages
+  } = useChat({
+    api: config.api,
+    id: config.id,
+    initialMessages: config.initialMessages,
+    headers: config.headers,
+    body: config.body,
+    onResponse: config.onResponse,
+    onFinish: config.onFinish,
+    onError: config.onError
+  });
+
+  return {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    error,
+    append,
+    reload,
+    stop,
+    setMessages
+  };
+};
+
+/**
+ * 2. Completion Implementation with useCompletion
+ */
+interface UseCompletionConfig {
+  api: string;
+  id?: string;
+  initialInput?: string;
+  headers?: Record<string, string>;
+  body?: Record<string, unknown>;
+  onResponse?: (response: Response) => void | Promise<void>;
+  onFinish?: (prompt: string, completion: string) => void;
+  onError?: (error: Error) => void;
+}
+
+// Custom Completion Hook
+const useAICompletion = (config: UseCompletionConfig) => {
+  const {
+    completion,
+    input,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    error,
+    stop,
+    setInput
+  } = useCompletion({
+    api: config.api,
+    id: config.id,
+    initialInput: config.initialInput,
+    headers: config.headers,
+    body: config.body,
+    onResponse: config.onResponse,
+    onFinish: config.onFinish,
+    onError: config.onError
+  });
+
+  return {
+    completion,
+    input,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    error,
+    stop,
+    setInput
+  };
+};
+
+/**
+ * 3. Stream Text Implementation
+ */
+interface StreamConfig {
+  model: string;
+  messages: Message[];
+  temperature?: number;
+  maxTokens?: number;
+  onToken?: (token: string) => void;
+}
+
+// Stream Text Utility
+const streamAIResponse = async (config: StreamConfig) => {
+  const stream = await streamText({
+    model: config.model,
+    messages: config.messages,
+    temperature: config.temperature,
+    maxTokens: config.maxTokens
+  });
+
+  return stream.toDataStreamResponse();
+};
+
+/**
+ * 4. Generate Object Implementation
+ */
+interface GenerateConfig<T> {
+  model: string;
+  schema: z.ZodType<T>;
+  prompt: string;
+  temperature?: number;
+  maxTokens?: number;
+}
+
+// Generate Object Utility
+const generateAIObject = async <T>(config: GenerateConfig<T>) => {
+  const { object } = await generateObject({
+    model: config.model,
+    schema: config.schema,
+    prompt: config.prompt,
+    temperature: config.temperature,
+    maxTokens: config.maxTokens
+  });
+
+  return object;
+};
+
+/**
+ * 5. Example Usage in Components
+ */
+
+// Chat Component Example
+const ChatComponent = () => {
+  const { messages, input, handleInputChange, handleSubmit, isLoading } = useAIChat({
+    api: '/api/chat',
+    initialMessages: [],
+    onFinish: (message) => {
+      console.log('Chat finished:', message);
+    }
+  });
+
+  return (
+    <div>
+      <div className="messages">
+        {messages.map((message) => (
+          <div key={message.id} className="message">
+            {message.content}
+          </div>
+        ))}
+      </div>
+      <form onSubmit={handleSubmit}>
+        <input
+          value={input}
+          onChange={handleInputChange}
+          placeholder="Type your message..."
+          disabled={isLoading}
+        />
+        <button type="submit" disabled={isLoading}>
+          Send
+        </button>
+      </form>
+    </div>
+  );
+};
+
+// Code Completion Component Example
+const CompletionComponent = () => {
+  const { completion, input, handleInputChange, handleSubmit, isLoading } = useAICompletion({
+    api: '/api/completion',
+    onFinish: (prompt, completion) => {
+      console.log('Completion finished:', { prompt, completion });
+    }
+  });
+
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <textarea
+          value={input}
+          onChange={handleInputChange}
+          placeholder="Enter your code..."
+          disabled={isLoading}
+        />
+        <button type="submit" disabled={isLoading}>
+          Complete
+        </button>
+      </form>
+      <pre>{completion}</pre>
+    </div>
+  );
+};
+
+/**
+ * 6. API Route Implementation
+ */
+
+// Chat API Route
+export async function POST(req: Request) {
+  try {
+    const { messages } = await req.json();
+    
+    const stream = await streamText({
+      model: 'deepseek-chat',
+      messages,
+      temperature: 0.7,
+      maxTokens: 500
+    });
+
+    return stream.toDataStreamResponse();
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: 'Failed to process chat request' }),
+      { status: 500 }
+    );
+  }
+}
+
+// Completion API Route
+export async function POST(req: Request) {
+  try {
+    const { prompt } = await req.json();
+    
+    const { object: completion } = await generateObject({
+      model: 'deepseek-chat',
+      schema: z.object({
+        completion: z.string(),
+        metadata: z.object({
+          tokens: z.number(),
+          model: z.string()
+        })
+      }),
+      prompt
+    });
+
+    return new Response(JSON.stringify(completion));
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: 'Failed to generate completion' }),
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * 7. Error Handling and Types
+ */
+
+// AI Response Types
+interface AIResponse<T> {
+  data?: T;
+  error?: {
+    message: string;
+    code: string;
+    details?: unknown;
+  };
+}
+
+// Stream Handler Types
+interface StreamHandler {
+  onToken: (token: string) => void;
+  onComplete: () => void;
+  onError: (error: Error) => void;
+}
+
+// Error Types
+interface AIErrorResponse {
+  error: {
+    message: string;
+    code: string;
+    details?: unknown;
+  };
+}
+
+/**
+ * 8. Utility Functions
+ */
+
+// Stream Processing
+const processStream = async (
+  response: Response,
+  handlers: StreamHandler
+) => {
+  const reader = response.body?.getReader();
+  const decoder = new TextDecoder();
+
+  try {
+    while (reader) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      const chunk = decoder.decode(value);
+      handlers.onToken(chunk);
+    }
+    handlers.onComplete();
+  } catch (error) {
+    handlers.onError(error as Error);
+  }
+};
+
+// Message Formatting
+const formatAIMessage = (role: Message['role'], content: string): Message => ({
+  id: nanoid(),
+  role,
+  content
+});
+
+// Response Validation
+const validateAIResponse = <T>(response: unknown): AIResponse<T> => {
+  if (!response || typeof response !== 'object') {
+    return {
+      error: {
+        message: 'Invalid response format',
+        code: 'INVALID_RESPONSE'
+      }
+    };
+  }
+
+  return response as AIResponse<T>;
+};
+
+/**
+ * 9. Constants and Configurations
+ */
+
+const AI_SDK_CONFIG = {
+  endpoints: {
+    chat: '/api/chat',
+    completion: '/api/completion',
+    review: '/api/review',
+    explain: '/api/explain'
+  },
+  models: {
+    chat: 'deepseek-chat',
+    completion: 'deepseek-chat'
+  },
+  defaults: {
+    temperature: 0.7,
+    maxTokens: 500,
+    streamChunkSize: 1024
+  },
+  timeouts: {
+    request: 30000,
+    stream: 60000
+  }
+} as const;
+
+const AI_RESPONSE_HEADERS = {
+  'Content-Type': 'text/event-stream',
+  'Cache-Control': 'no-cache',
+  'Connection': 'keep-alive'
+} as const;

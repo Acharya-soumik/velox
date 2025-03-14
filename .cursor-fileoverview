@@ -1,0 +1,694 @@
+# Velox - AI-Powered Coding Platform
+
+## Project Overview
+This is a modern web application built with Next.js 13+, utilizing the App Router pattern. It's an AI-powered coding platform that helps users learn and practice coding through interactive problems, real-time code execution, and AI-assisted learning.
+
+## Tech Stack
+- Next.js 13+ (App Router)
+- TypeScript
+- Supabase (Authentication & Database)
+- Tailwind CSS
+- Shadcn UI Components
+- AI SDK (Vercel 4.1)
+
+## Directory Structure
+
+```
+/
+├── app/                          # Next.js 13+ App Router
+│   ├── (auth-pages)/            # Authentication related pages
+│   ├── api/                     # API routes
+│   ├── auth/                    # Auth specific routes
+│   ├── dashboard/               # User dashboard
+│   ├── problems/                # Coding problems section
+│   ├── profile/                 # User profile management
+│   ├── resume/                  # Resume section
+│   ├── actions.ts              # Server actions
+│   ├── globals.css             # Global styles
+│   ├── layout.tsx              # Root layout
+│   └── page.tsx                # Home page
+│
+├── components/                   # React Components
+│   ├── editor/                  # Code editor components
+│   ├── layout/                  # Layout components
+│   ├── profile/                 # Profile related components
+│   ├── resume/                  # Resume related components
+│   ├── tutorial/                # Tutorial components
+│   ├── typography/              # Typography components
+│   ├── ui/                      # Shadcn UI components
+│   ├── chat-sheet.tsx          # Chat interface
+│   ├── theme-switcher.tsx      # Theme toggle
+│   └── [other components]      # Various UI components
+│
+├── lib/                         # Utility functions
+│   └── [utility modules]       # Helper functions
+│
+├── hooks/                       # Custom React hooks
+│
+├── types/                       # TypeScript type definitions
+│
+├── utils/                       # Utility functions
+│
+├── public/                      # Static assets
+│
+└── [config files]              # Configuration files
+    ├── .env                    # Environment variables
+    ├── tailwind.config.ts      # Tailwind configuration
+    ├── next.config.ts          # Next.js configuration
+    └── tsconfig.json          # TypeScript configuration
+
+## Key Features
+
+### Authentication
+- Supabase-based authentication
+- Protected routes
+- Session management
+- OAuth providers support
+
+### Code Editor
+- Real-time code execution
+- Multiple language support
+- AI-powered code suggestions
+- Syntax highlighting
+
+### Problem Management
+- Categorized coding problems
+- Difficulty levels
+- Test cases
+- Solution validation
+
+### AI Integration
+- AI-powered code review
+- Learning suggestions
+- Real-time assistance
+- Performance analysis
+
+### User Features
+- Profile management
+- Progress tracking
+- Resume builder
+- Dashboard analytics
+
+## Configuration Files
+
+### Environment Variables (.env)
+- Supabase configuration
+- API keys
+- Database URLs
+- Feature flags
+
+### Tailwind Configuration (tailwind.config.ts)
+- Custom theme settings
+- Plugin configurations
+- Utility classes
+
+### Next.js Configuration (next.config.ts)
+- Build settings
+- API configurations
+- Environment settings
+
+## Development Guidelines
+
+### Code Style
+- TypeScript for type safety
+- Tailwind for styling
+- Component-based architecture
+- Server Components by default
+
+### Best Practices
+- Server-side rendering
+- API route protection
+- Error handling
+- Loading states
+- Form validation
+
+### Performance
+- Image optimization
+- Code splitting
+- Caching strategies
+- Bundle optimization
+
+## Core Utilities and Database
+
+### Database Layer (lib/db.ts)
+- Supabase database integration
+- Type-safe database operations
+- Query builders and helpers
+- Transaction management
+- Real-time subscriptions
+
+### Utility Functions (lib/utils/)
+- Helper functions for common operations
+- Type guards and validators
+- Date and time utilities
+- String manipulation
+- Data transformation
+
+### AI Integration (lib/deepseek.ts)
+- DeepSeek AI model integration
+- Code analysis capabilities
+- Learning assistance
+- Performance optimization
+
+### General Utilities (lib/utils.ts)
+- Common helper functions
+- Shared type definitions
+- Constants and configurations
+- Error handling utilities
+
+## API Routes and Backend Functionality
+
+### User Management
+- `/api/profile/` - User profile management
+- `/api/resume/` - Resume builder and management
+
+### Learning System
+- `/api/problems/` - Coding problems CRUD operations
+- `/api/question/` - Question management and responses
+- `/api/knowledge/` - Knowledge base and learning resources
+- `/api/topics/` - Topic categorization and management
+- `/api/patterns/` - Coding patterns and solutions
+
+### AI Features
+- `/api/review/` - AI-powered code review
+- `/api/code-analysis/` - Code analysis and suggestions
+- `/api/explain/` - Code explanation and documentation
+
+### Key Characteristics
+- RESTful API design
+- Type-safe endpoints
+- Rate limiting
+- Error handling
+- Request validation
+- Response caching
+- Authentication middleware
+- CORS configuration
+
+## Quick Reference Guide
+
+### Authentication Flow
+```typescript
+// Server-side auth check
+const AuthComponent = async () => {
+  const supabase = createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) redirect('/login');
+  return <ProtectedContent />;
+};
+
+// Client-side auth
+const handleSignIn = async () => {
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+};
+```
+
+### Database Operations
+```typescript
+// Type-safe query
+const getUser = async (id: string) => {
+  const { data, error } = await supabase
+    .from('users')
+    .select('id, name, email')
+    .eq('id', id)
+    .single();
+};
+
+// Real-time subscription
+const subscribeToChanges = () => {
+  const subscription = supabase
+    .channel('table_changes')
+    .on('postgres_changes', { 
+      event: '*', 
+      schema: 'public' 
+    }, handler)
+    .subscribe();
+};
+```
+
+### AI Integration
+```typescript
+// Code review
+const reviewCode = async (code: string) => {
+  const response = await fetch('/api/review', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+  return response.json();
+};
+
+// Code explanation
+const explainCode = async (code: string) => {
+  const response = await fetch('/api/explain', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+  return response.json();
+};
+```
+
+### Common Components
+```typescript
+// Protected Route Wrapper
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useUser();
+  if (!user) return <RedirectToLogin />;
+  return <>{children}</>;
+};
+
+// Loading State
+const LoadingState = () => {
+  return (
+    <div className="flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2" />
+    </div>
+  );
+};
+```
+
+### API Error Handling
+```typescript
+// API Route Error Handler
+export async function GET(req: Request) {
+  try {
+    // ... logic
+    return NextResponse.json(data);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+### Form Validation
+```typescript
+// Form with validation
+const validateForm = (data: FormData) => {
+  const errors: Record<string, string> = {};
+  if (!data.get('email')) {
+    errors.email = 'Email is required';
+  }
+  if (!data.get('password')) {
+    errors.password = 'Password is required';
+  }
+  return errors;
+};
+
+// Server Action
+export async function submitForm(formData: FormData) {
+  const errors = validateForm(formData);
+  if (Object.keys(errors).length > 0) {
+    return { errors };
+  }
+  // Process form...
+}
+```
+
+### Common Utility Functions
+```typescript
+// Date formatting
+export const formatDate = (date: Date): string => {
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(date);
+};
+
+// API request wrapper
+export const fetchApi = async <T>(
+  endpoint: string,
+  options?: RequestInit
+): Promise<T> => {
+  const response = await fetch(endpoint, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  });
+  if (!response.ok) {
+    throw new Error('API request failed');
+  }
+  return response.json();
+};
+```
+
+### Environment Variables Usage
+```typescript
+// Environment validation
+const requiredEnvVars = [
+  'NEXT_PUBLIC_SUPABASE_URL',
+  'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+  'SUPABASE_SERVICE_ROLE_KEY',
+] as const;
+
+requiredEnvVars.forEach((envVar) => {
+  if (!process.env[envVar]) {
+    throw new Error(`Missing required env var: ${envVar}`);
+  }
+});
+```
+
+## Security Considerations
+- Authentication flow
+- API route protection
+- Environment variable management
+- CORS policies
+- Rate limiting
+
+## App Routes Documentation
+
+### Problems Module (`/app/problems/`)
+```typescript
+// Directory Structure
+/problems
+├── page.tsx              # Problems list page
+├── new/                  # New problem creation
+│   └── page.tsx         # Problem creation form
+└── [id]/                # Dynamic problem routes
+    └── page.tsx         # Individual problem page
+
+// Problem Types
+interface Problem {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  category: string;
+  examples: Example[];
+  constraints: string[];
+  testCases: TestCase[];
+  solution?: string;
+  hints?: string[];
+  timeComplexity?: string;
+  spaceComplexity?: string;
+}
+
+// Common Operations
+const problemOperations = {
+  list: async () => {
+    const { data } = await supabase
+      .from('problems')
+      .select('*')
+      .order('created_at', { ascending: false });
+    return data;
+  },
+  
+  create: async (problem: Omit<Problem, 'id'>) => {
+    const { data } = await supabase
+      .from('problems')
+      .insert(problem)
+      .select()
+      .single();
+    return data;
+  },
+  
+  get: async (id: string) => {
+    const { data } = await supabase
+      .from('problems')
+      .select('*, topics(*), patterns(*)')
+      .eq('id', id)
+      .single();
+    return data;
+  },
+  
+  update: async (id: string, updates: Partial<Problem>) => {
+    const { data } = await supabase
+      .from('problems')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    return data;
+  }
+};
+```
+
+### Resume Builder (`/app/resume/`)
+```typescript
+// Directory Structure
+/resume
+├── page.tsx              # Resume dashboard
+├── new/                  # Create new resume
+│   └── page.tsx         # Resume creation form
+├── templates/           # Resume templates
+│   └── [template]/      # Template specific pages
+└── [id]/                # Dynamic resume routes
+    ├── page.tsx         # View/Edit resume
+    └── preview/         # Resume preview
+        └── page.tsx     # Preview page
+
+// Resume Types
+interface Resume {
+  id: string;
+  userId: string;
+  template: string;
+  personalInfo: PersonalInfo;
+  experience: Experience[];
+  education: Education[];
+  skills: Skill[];
+  projects: Project[];
+  customSections?: CustomSection[];
+}
+
+// Common Operations
+const resumeOperations = {
+  create: async (resume: Omit<Resume, 'id'>) => {
+    const { data } = await supabase
+      .from('resumes')
+      .insert(resume)
+      .select()
+      .single();
+    return data;
+  },
+  
+  get: async (id: string) => {
+    const { data } = await supabase
+      .from('resumes')
+      .select('*')
+      .eq('id', id)
+      .single();
+    return data;
+  }
+};
+```
+
+### Profile Management (`/app/profile/`)
+```typescript
+// Directory Structure
+/profile
+├── page.tsx              # Profile dashboard
+├── settings/            # User settings
+│   └── page.tsx         # Settings form
+└── analytics/          # User analytics
+    └── page.tsx         # Analytics dashboard
+
+// Profile Types
+interface Profile {
+  id: string;
+  userId: string;
+  name: string;
+  bio?: string;
+  skills: string[];
+  experience: number;
+  preferredLanguages: string[];
+  socialLinks?: {
+    github?: string;
+    linkedin?: string;
+    twitter?: string;
+  };
+  settings: UserSettings;
+}
+
+// Common Operations
+const profileOperations = {
+  update: async (updates: Partial<Profile>) => {
+    const { data } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('userId', user.id)
+      .select()
+      .single();
+    return data;
+  },
+  
+  getSettings: async () => {
+    const { data } = await supabase
+      .from('user_settings')
+      .select('*')
+      .eq('userId', user.id)
+      .single();
+    return data;
+  }
+};
+```
+
+### Knowledge Base (`/app/knowledge/`)
+```typescript
+// Directory Structure
+/knowledge
+├── page.tsx              # Knowledge base home
+├── topics/              # Topics listing
+│   └── [topic]/         # Topic specific content
+└── search/             # Search functionality
+    └── page.tsx         # Search interface
+
+// Knowledge Types
+interface KnowledgeItem {
+  id: string;
+  title: string;
+  content: string;
+  topics: string[];
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  relatedProblems?: string[];
+  examples: Example[];
+  references?: Reference[];
+}
+
+// Common Operations
+const knowledgeOperations = {
+  search: async (query: string) => {
+    const { data } = await supabase
+      .from('knowledge_base')
+      .select('*')
+      .textSearch('content', query);
+    return data;
+  },
+  
+  getByTopic: async (topic: string) => {
+    const { data } = await supabase
+      .from('knowledge_base')
+      .select('*')
+      .contains('topics', [topic]);
+    return data;
+  }
+};
+```
+
+### Dashboard (`/app/dashboard/`)
+```typescript
+// Directory Structure
+/dashboard
+├── page.tsx              # Dashboard home
+├── analytics/           # User analytics
+│   └── page.tsx         # Analytics dashboard
+├── progress/           # Learning progress
+│   └── page.tsx         # Progress tracking
+└── achievements/       # User achievements
+    └── page.tsx         # Achievements page
+
+// Dashboard Types
+interface DashboardStats {
+  problemsSolved: number;
+  totalProblems: number;
+  weeklyStreak: number;
+  achievements: Achievement[];
+  recentActivity: Activity[];
+  progressByTopic: TopicProgress[];
+}
+
+// Common Operations
+const dashboardOperations = {
+  getStats: async () => {
+    const { data } = await supabase
+      .from('user_stats')
+      .select('*')
+      .eq('userId', user.id)
+      .single();
+    return data;
+  },
+  
+  getProgress: async () => {
+    const { data } = await supabase
+      .from('user_progress')
+      .select('*')
+      .eq('userId', user.id);
+    return data;
+  }
+};
+```
+
+### Authentication (`/app/auth/`)
+```typescript
+// Directory Structure
+/auth
+├── sign-in/             # Sign in page
+│   └── page.tsx        # Sign in form
+├── sign-up/            # Sign up page
+│   └── page.tsx        # Sign up form
+├── reset-password/     # Password reset
+│   └── page.tsx        # Reset form
+└── callback/          # OAuth callbacks
+    └── route.ts       # Callback handler
+
+// Auth Types
+interface AuthState {
+  user: User | null;
+  session: Session | null;
+  loading: boolean;
+}
+
+interface AuthFormData {
+  email: string;
+  password: string;
+  name?: string;
+  confirmPassword?: string;
+}
+
+// Common Operations
+const authOperations = {
+  signIn: async ({ email, password }: AuthFormData) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    return { data, error };
+  },
+  
+  signUp: async ({ email, password, name }: AuthFormData) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { name }
+      }
+    });
+    return { data, error };
+  },
+  
+  resetPassword: async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    return { error };
+  },
+  
+  signOut: async () => {
+    const { error } = await supabase.auth.signOut();
+    return { error };
+  }
+};
+
+// Server Actions
+const serverActions = {
+  handleAuthCallback: async () => {
+    const { searchParams } = new URL(request.url);
+    const code = searchParams.get('code');
+    
+    if (code) {
+      await supabase.auth.exchangeCodeForSession(code);
+    }
+    
+    return redirect('/dashboard');
+  }
+};
+```

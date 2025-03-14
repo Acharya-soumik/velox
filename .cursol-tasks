@@ -1,0 +1,263 @@
+# Resume Module Implementation Plan
+
+## Sprint 1: Foundation & Landing Page
+[X] Task Analysis and Planning
+[X] Resume Module Core Structure Setup
+  - Create base directory structure in /app/resume ✓
+  - Set up route handlers and basic layouts ✓
+  - Implement basic navigation flow ✓
+
+[X] Landing Page Implementation
+  - Module introduction component ✓
+  - Download prompt file functionality ✓
+  - Basic styling and responsive design ✓
+
+[X] Profile Setup Screen
+  - JSON input interface component ✓
+  - JSON validation utilities ✓
+  - Profile data confirmation UI ✓
+  - Error handling and feedback ✓
+
+## Sprint 2: Dashboard & Resume Management
+[X] Resume Dashboard Implementation
+  - List view component for saved resumes ✓
+  - Basic CRUD operations setup ✓
+  - Resume card component design ✓
+  - Action buttons implementation ✓
+
+[X] Create New Resume Flow
+  - Form design for job description input ✓
+  - Company information input component ✓
+  - Integration with AI analysis endpoint ✓
+  - Progress tracking implementation ✓
+
+[X] Database Schema Updates
+  - Resume table structure ✓
+  - Profile data storage ✓
+  - Relations and constraints setup ✓
+  - Migration scripts ✓
+
+## Sprint 3: AI Integration & Analysis
+[X] AI Analysis Implementation
+  - Integration with Vercel AI SDK ✓
+  - Profile data analysis utilities ✓
+  - Missing information detection ✓
+  - Response processing logic ✓
+
+[X] Dynamic Questionnaire System
+  - Modal component development ✓
+  - Dynamic form generation ✓
+  - Response handling and storage ✓
+  - Skip logic implementation ✓
+
+[X] Resume Generation Logic
+  - Template system setup ✓
+  - AI-based content generation ✓
+  - Format and styling application ✓
+  - Preview component development ✓
+
+## Sprint 4: Cover Letter & Refinements
+[X] Cover Letter Generation
+  - Generation interface development ✓
+  - AI integration for personalization ✓
+  - Edit and preview functionality ✓
+  - Save and download options ✓
+
+[X] Resume Detail Page
+  - Detailed view component ✓
+  - Edit functionality ✓
+  - Delete confirmation flow ✓
+  - Cover letter generation integration ✓
+
+[X] Final Integration & Testing
+  - End-to-end testing ✓
+  - Performance optimization ✓
+  - Bug fixes and refinements ✓
+  - Documentation updates ✓
+
+## Dependencies & Integration Points
+
+### Database Schema (Supabase)
+```sql
+-- Updated schema with user_profiles table
+CREATE TABLE user_profiles (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id),
+  profile_data JSONB NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE resumes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id),
+  title TEXT NOT NULL,
+  content JSONB NOT NULL,
+  job_description TEXT,
+  company_name TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE resume_versions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  resume_id UUID REFERENCES resumes(id),
+  content JSONB NOT NULL,
+  version_number INTEGER NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE cover_letters (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  resume_id UUID REFERENCES resumes(id),
+  content TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### Resume Data Format Reference
+```typescript
+interface ResumeData {
+  personalInfo: {
+    name: string;
+    title: string;
+    contact: {
+      email: string;
+      phone: string;
+      socialLinks: {
+        linkedin: boolean;
+        github: boolean;
+      };
+    };
+  };
+  
+  summary: string;
+  
+  technicalSkills: {
+    programming: string[];
+    frontend: string[];
+    backend: string[];
+    devopsAndTools: string[];
+    cloudAndTesting: string[];
+  };
+  
+  education: Array<{
+    institution: string;
+    degree?: string;
+    courses?: string[];
+    year: string;
+  }>;
+  
+  achievements: string[];
+  
+  experience: Array<{
+    company: string;
+    position: string;
+    duration: string;
+    technologies: string[];
+    responsibilities?: string[];
+  }>;
+}
+
+// Example Data
+const exampleResumeData = {
+  personalInfo: {
+    name: "Soumik Acharjee",
+    title: "Frontend Developer",
+    contact: {
+      email: "soumik.acharjee.work@gmail.com",
+      phone: "+91 8910373618",
+      socialLinks: {
+        linkedin: true,
+        github: true
+      }
+    }
+  },
+  
+  summary: "Senior Frontend Developer with 4+ years of experience...",
+  
+  technicalSkills: {
+    programming: ["JavaScript", "TypeScript", "Python", "HTML", "CSS", "Data Structures"],
+    frontend: [
+      "React.js",
+      "Next.js",
+      "React Native",
+      "Redux",
+      "Context-API",
+      "WebSockets",
+      "Micro Frontend",
+      "Framer Motion",
+      "Tailwind",
+      "Webpack",
+      "Material UI"
+    ],
+    backend: ["Node.js", "Flask", "MongoDB", "MySql"],
+    devopsAndTools: ["Docker", "CI/CD", "Git", "Design Systems", "AI tools"],
+    cloudAndTesting: ["AWS", "Firebase", "Jest", "React-Testing-Library"]
+  },
+  
+  education: [
+    {
+      institution: "ALGO UNIVERSITY EXTERNSHIP",
+      courses: [
+        "Advanced Data Structures and Algorithms",
+        "System Design"
+      ],
+      year: "2024"
+    }
+  ],
+  
+  achievements: [
+    "Ranked 13th in Meta Hacker Cup 2024 (Open LLM Track)",
+    "Led development serving 20M+ users at FamPay"
+  ],
+  
+  experience: [
+    {
+      company: "TMRW - ADITYA BIRLA FASHION VENTURES",
+      position: "SDE-2 | Frontend Engineer",
+      duration: "April 2024 - September 2024",
+      technologies: ["SSR", "Nextjs", "React Native", "TypeScript", "Redux", "Jest", "Figma"],
+      responsibilities: [
+        "Migrated legacy codebase for product listing and details screen...",
+        "Configured react native app to handle web views...",
+        "Enhanced page performance, slashing bundle size by 91%..."
+      ]
+    }
+  ]
+};
+```
+
+### AI Integration Points
+1. Profile Analysis: /api/resume/analyze ✓
+2. Resume Generation: /api/resume/generate ✓
+3. Cover Letter Generation: /api/resume/cover-letter ✓
+
+### Required Components
+1. ResumeCard ✓
+2. ResumeForm ✓
+3. QuestionnaireModal ✓
+4. CoverLetterGenerator ✓
+5. ResumePreview ✓
+6. ProfileValidator ✓
+7. TemplateSelector ✓
+8. ResumePDF ✓
+9. Documentation ✓
+
+### State Management
+1. Resume creation flow ✓
+2. Profile data ✓
+3. Questionnaire responses ✓
+4. Generated content ✓
+5. Template selection ✓
+6. PDF generation ✓
+7. Error handling ✓
+
+### API Routes
+1. /api/resume/profile ✓
+2. /api/resume/create ✓
+3. /api/resume/analyze ✓
+4. /api/resume/generate ✓
+5. /api/resume/cover-letter ✓
+6. /api/resume/download ✓

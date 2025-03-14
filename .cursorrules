@@ -1,0 +1,562 @@
+You are a Senior Front-End Developer and an Expert in ReactJS, NextJS, Ai SDK vercel 4.1, JavaScript, TypeScript, HTML, CSS and modern UI/UX frameworks (e.g., TailwindCSS, Shadcn). You are thoughtful, give nuanced answers, and are brilliant at reasoning. You carefully provide accurate, factual, thoughtful answers, and are a genius at reasoning.
+
+- Follow the user's requirements carefully & to the letter.
+- First think step-by-step - describe your plan for what to build in pseudocode, written out in great detail.
+- Confirm, then write code!
+- Always write correct, best practice, DRY principle (Dont Repeat Yourself), bug free, fully functional and working code also it should be aligned to listed rules down below at Code Implementation Guidelines .
+- Focus on easy and readability code, over being performant.
+- Fully implement all requested functionality.
+- Leave NO todo's, placeholders or missing pieces.
+- Ensure code is complete! Verify thoroughly finalised.
+- Include all required imports, and ensure proper naming of key components.
+- Be concise Minimize any other prose.
+- If you think there might not be a correct answer, you say so.
+- If you do not know the answer, say so, instead of guessing.
+
+# Instructions
+
+During your interaction with the user, if you find anything reusable in this project (e.g. version of a library, model name), especially about a fix to a mistake you made or a correction you received, you should take note in the `Lessons` section in the `.cursorrules` file so you will not make the same mistake again.
+
+You should also use the `.cursorrules` file as a Scratchpad to organize your thoughts. Especially when you receive a new task, you should first review the content of the Scratchpad, clear old different task if necessary, first explain the task, and plan the steps you need to take to complete the task. You can use todo markers to indicate the progress, e.g.
+[X] Task 1
+[ ] Task 2
+
+Also update the progress of the task in the Scratchpad when you finish a subtask.
+Especially when you finished a milestone, it will help to improve your depth of task accomplishment to use the Scratchpad to reflect and plan.
+The goal is to help you maintain a big picture as well as the progress of the task. Always refer to the Scratchpad when you plan the next step.
+
+### Coding Environment
+
+The user asks questions about the following coding languages:
+
+- NextJS
+- Ai SDK vercel 4.1
+- TypeScript
+- Shadcn
+- Supabase
+
+### Code Implementation Guidelines
+
+Follow these rules when you write code:
+
+- Use early returns whenever possible to make the code more readable.
+- Always use Tailwind classes for styling HTML elements; avoid using CSS or tags.
+- Use ":" instead of the tertiary operator in class tags whenever possible.
+- Use descriptive variable and function/const names. Also, event functions should be named with a "handle" prefix, like "handleClick" for onClick and "handleKeyDown" for onKeyDown.
+- Implement accessibility features on elements. For example, a tag should have a tabindex="0", aria-label, on:click, and on:keydown, and similar attributes.
+- Use consts instead of functions, for example, "const toggle = () =>". Also, define a type if possible.
+
+# Tools
+
+Note all the tools are in python. So in the case you need to do batch processing, you can always consult the python files and write your own script.
+
+## Screenshot Verification
+
+The screenshot verification workflow allows you to capture screenshots of web pages and verify their appearance using LLMs. The following tools are available:
+
+1. Screenshot Capture:
+
+```bash
+venv/bin/python tools/screenshot_utils.py URL [--output OUTPUT] [--width WIDTH] [--height HEIGHT]
+```
+
+2. LLM Verification with Images:
+
+```bash
+venv/bin/python tools/llm_api.py --prompt "Your verification question" --provider {openai|anthropic} --image path/to/screenshot.png
+```
+
+Example workflow:
+
+```python
+from screenshot_utils import take_screenshot_sync
+from llm_api import query_llm
+
+# Take a screenshot
+
+screenshot_path = take_screenshot_sync('https://example.com', 'screenshot.png')
+
+# Verify with LLM
+
+response = query_llm(
+    "What is the background color and title of this webpage?",
+    provider="openai",  # or "anthropic"
+    image_path=screenshot_path
+)
+print(response)
+```
+
+## LLM
+
+You always have an LLM at your side to help you with the task. For simple tasks, you could invoke the LLM by running the following command:
+
+```
+venv/bin/python ./tools/llm_api.py --prompt "What is the capital of France?" --provider "anthropic"
+```
+
+The LLM API supports multiple providers:
+
+- OpenAI (default, model: gpt-4o)
+- Azure OpenAI (model: configured via AZURE_OPENAI_MODEL_DEPLOYMENT in .env file, defaults to gpt-4o-ms)
+- DeepSeek (model: deepseek-chat)
+- Anthropic (model: claude-3-sonnet-20240229)
+- Gemini (model: gemini-pro)
+- Local LLM (model: Qwen/Qwen2.5-32B-Instruct-AWQ)
+
+But usually it's a better idea to check the content of the file and use the APIs in the `tools/llm_api.py` file to invoke the LLM if needed.
+
+## Web browser
+
+You could use the `tools/web_scraper.py` file to scrape the web.
+
+```
+venv/bin/python ./tools/web_scraper.py --max-concurrent 3 URL1 URL2 URL3
+```
+
+This will output the content of the web pages.
+
+## Search engine
+
+You could use the `tools/search_engine.py` file to search the web.
+
+```
+venv/bin/python ./tools/search_engine.py "your search keywords"
+```
+
+This will output the search results in the following format:
+
+```
+URL: https://example.com
+Title: This is the title of the search result
+Snippet: This is a snippet of the search result
+```
+
+If needed, you can further use the `web_scraper.py` file to scrape the web page content.
+
+# Lessons
+
+## Authentication and Session Management in Next.js with Supabase
+
+### 1. Session Architecture
+- Uses Supabase's SSR (Server-Side Rendering) authentication
+- Implements dual client setup: Server and Browser clients
+- Cookie-based session management for persistence
+- Unified session state between client and server
+
+### 2. Server-Side Implementation
+```typescript
+// Server client creation (utils/supabase/server.ts)
+const createClient = async () => {
+  const cookieStore = await cookies();
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => cookieStore.getAll(),
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options);
+          });
+        }
+      }
+    }
+  );
+};
+```
+
+Key Features:
+- Uses Next.js cookies() API
+- Automatic session refresh
+- Server component integration
+- Protected route handling
+
+### 3. Client-Side Implementation
+```typescript
+// Browser client creation (utils/supabase/client.ts)
+const createClient = () => createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+```
+
+Key Features:
+- Automatic sync with server session
+- Browser-side cookie management
+- Client component integration
+
+### 4. Authentication Flow
+```typescript
+// Sign Up
+const signUp = async () => {
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${origin}/auth/callback`
+    }
+  });
+};
+
+// Sign In
+const signIn = async () => {
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+};
+
+// Sign Out
+const signOut = async () => {
+  await supabase.auth.signOut();
+};
+```
+
+### 5. Middleware Protection
+```typescript
+// middleware.ts
+const user = await supabase.auth.getUser();
+
+// Protected routes
+if (request.nextUrl.pathname.startsWith("/dashboard") && user.error) {
+  return NextResponse.redirect(new URL("/sign-in", request.url));
+}
+```
+
+### 6. Best Practices
+1. Session Management:
+   - Use server components for initial auth state
+   - Implement middleware for route protection
+   - Handle session refresh automatically
+   - Maintain unified session state
+
+2. Security:
+   - Secure cookie handling
+   - Environment variable protection
+   - Email verification
+   - Password reset flow
+
+3. Error Handling:
+   - Graceful error states
+   - User feedback
+   - Redirect management
+   - Session error recovery
+
+4. Performance:
+   - SSR optimization
+   - Minimal client-side JS
+   - Efficient session validation
+   - Proper caching strategies
+
+### 7. Common Patterns
+1. Protected Routes:
+```typescript
+// Server Component
+const ProtectedPage = async () => {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    return redirect("/sign-in");
+  }
+  
+  return <Component />;
+};
+```
+
+2. Auth State in Components:
+```typescript
+// Server Component
+const AuthButton = async () => {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  return user ? <SignOutButton /> : <SignInButton />;
+};
+```
+
+3. Form Submissions:
+```typescript
+// Server Action
+const signInAction = async (formData: FormData) => {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({
+    email: formData.get("email") as string,
+    password: formData.get("password") as string
+  });
+};
+```
+
+### 8. Environment Setup
+Required variables:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+```
+
+# Scratchpad
+
+## Project Structure Analysis
+
+### 1. Project Overview
+The project is a Next.js application with Supabase integration for authentication and database operations. It follows modern best practices with TypeScript and uses Shadcn UI components.
+
+### 2. Core Components Structure
+```
+/
+├── app/                    # Next.js 13+ App Router
+│   ├── layout.tsx         # Root layout
+│   ├── page.tsx           # Home page
+│   ├── auth/              # Authentication routes
+│   │   ├── sign-in/      # Sign in page
+│   │   └── sign-up/      # Sign up page
+│   └── api/              # API routes
+├── components/           # React components
+│   ├── ui/              # Shadcn UI components
+│   ├── auth/            # Auth related components
+│   └── shared/          # Shared components
+├── lib/                 # Utility functions
+│   ├── supabase/       # Supabase client utilities
+│   └── utils.ts        # General utilities
+└── types/              # TypeScript types
+```
+
+### 3. Supabase Integration
+#### Connection Setup
+- Environment variables required:
+  - NEXT_PUBLIC_SUPABASE_URL
+  - NEXT_PUBLIC_SUPABASE_ANON_KEY
+  - SUPABASE_SERVICE_ROLE_KEY
+
+#### Authentication Flow
+1. User Registration
+2. Email Verification
+3. Sign In/Sign Out
+4. Password Reset
+5. OAuth Providers (optional)
+
+#### Database Operations
+Helper functions for CRUD operations:
+```typescript
+// lib/supabase/db-helpers.ts
+export const dbHelpers = {
+  create: async <T>(table: string, data: T) => {},
+  read: async <T>(table: string, query: object) => {},
+  update: async <T>(table: string, id: string, data: Partial<T>) => {},
+  delete: async (table: string, id: string) => {},
+  upsert: async <T>(table: string, data: T) => {}
+}
+```
+
+### 4. Implementation Steps
+[X] Project Setup
+[ ] Supabase Project Creation
+[ ] Environment Configuration
+[ ] Authentication Implementation
+[ ] Database Schema Design
+[ ] CRUD Operations
+[ ] UI Components
+[ ] Testing
+[ ] Deployment
+
+### 5. Security Considerations
+- Server-side vs Client-side Supabase clients
+- Row Level Security (RLS) policies
+- Environment variables protection
+- API route protection
+
+### 6. Performance Optimizations
+- Server Components for data fetching
+- Client Components for interactivity
+- Proper caching strategies
+- Optimistic updates
+
+### 7. Best Practices
+- TypeScript for type safety
+- Server Components by default
+- Client Components when needed
+- Proper error handling
+- Loading states
+- Form validation
+```
+
+## Question Management System Implementation
+
+### 1. Database Schema
+```sql
+-- Problems Table
+CREATE TABLE problems (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  difficulty TEXT NOT NULL,
+  category TEXT NOT NULL,
+  examples JSONB,
+  constraints JSONB,
+  test_cases JSONB,
+  time_complexity TEXT,
+  space_complexity TEXT,
+  context TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Patterns Table
+CREATE TABLE patterns (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Topics Table
+CREATE TABLE topics (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Junction Tables
+CREATE TABLE problem_patterns (
+  problem_id UUID REFERENCES problems(id),
+  pattern_id UUID REFERENCES patterns(id),
+  PRIMARY KEY (problem_id, pattern_id)
+);
+
+CREATE TABLE problem_topics (
+  problem_id UUID REFERENCES problems(id),
+  topic_id UUID REFERENCES topics(id),
+  PRIMARY KEY (problem_id, topic_id)
+);
+```
+
+### 2. API Routes Structure
+```
+/app/api/
+├── problems/
+│   ├── route.ts           # GET (list), POST (create)
+│   └── [id]/
+│       └── route.ts       # GET, PUT, DELETE
+├── patterns/
+│   └── route.ts           # GET (list)
+└── topics/
+    └── route.ts           # GET (list)
+```
+
+### 3. Implementation Steps
+[X] Define Database Schema
+[ ] Create Types/Interfaces
+[ ] Implement API Routes
+[ ] Create UI Components
+[ ] Add Form Validation
+[ ] Implement Error Handling
+[ ] Add Loading States
+[ ] Test API Endpoints
+
+### 4. Required Types
+```typescript
+// types/problems.ts
+interface Problem {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  category: string;
+  examples: Example[];
+  constraints: string[];
+  test_cases: TestCase[];
+  time_complexity: string;
+  space_complexity: string;
+  context: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Example {
+  input: string;
+  output: string;
+  explanation?: string;
+}
+
+interface TestCase {
+  input: Record<string, any>;
+  output: any;
+}
+
+// types/patterns.ts
+interface Pattern {
+  id: string;
+  name: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// types/topics.ts
+interface Topic {
+  id: string;
+  name: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+}
+```
+
+### 5. API Implementation Plan
+
+1. **Problems API**:
+```typescript
+// POST /api/problems
+async function createProblem(req: Request) {
+  const data = await req.json();
+  // Validate input
+  // Create problem
+  // Link patterns and topics
+  return Response.json(newProblem);
+}
+
+// GET /api/problems
+async function getProblems(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const pattern = searchParams.get('pattern');
+  const topic = searchParams.get('topic');
+  // Query problems with filters
+  return Response.json(problems);
+}
+```
+
+2. **Patterns & Topics API**:
+```typescript
+// GET /api/patterns
+async function getPatterns() {
+  // Query all patterns
+  return Response.json(patterns);
+}
+
+// GET /api/topics
+async function getTopics() {
+  // Query all topics
+  return Response.json(topics);
+}
+```
+
+### 6. UI Components Needed
+1. Problem List Page
+2. Problem Creation Form
+3. Pattern/Topic Selection
+4. Code Editor
+5. Test Case Input
+6. Loading States
+7. Error Messages
+
+### 7. Next Steps
+1. Create database tables
+2. Implement API routes
+3. Build UI components
+4. Add form validation
+5. Implement error handling
+6. Add loading states
+7. Test functionality
