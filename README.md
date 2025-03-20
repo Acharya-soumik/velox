@@ -4,6 +4,8 @@ A modern web application built with Next.js, TypeScript, Supabase, and Shadcn UI
 
 ## Project Structure
 
+npx -y @modelcontextprotocol/server-postgres
+
 The project is organized into the following main directories:
 
 ```

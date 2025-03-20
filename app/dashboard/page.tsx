@@ -1,9 +1,21 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import Link from "next/link";
-import { PlusCircle, ListChecks, Settings, FileText } from "lucide-react";
+import {
+  PlusCircle,
+  ListChecks,
+  Settings,
+  FileText,
+  Timer,
+} from "lucide-react";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -64,6 +76,33 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
+        {/* Interview Practice Card */}
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Timer className="h-5 w-5" />
+              Interview Practice
+            </CardTitle>
+            <CardDescription>
+              Practice timed coding interviews with customizable settings
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <Button asChild variant="outline" className="w-full justify-start">
+              <Link href="/interview">
+                <Timer className="mr-2 h-4 w-4" />
+                Start Interview
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full justify-start">
+              <Link href="/interview/history">
+                <ListChecks className="mr-2 h-4 w-4" />
+                View History
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+
         {/* Resume Management Card */}
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
@@ -108,7 +147,11 @@ export default async function DashboardPage() {
                 <div className="font-medium mb-1">Email</div>
                 <div className="text-muted-foreground">{user.email}</div>
               </div>
-              <Button asChild variant="outline" className="w-full justify-start">
+              <Button
+                asChild
+                variant="outline"
+                className="w-full justify-start"
+              >
                 <Link href="/settings">
                   <Settings className="mr-2 h-4 w-4" />
                   Manage Settings
@@ -133,7 +176,7 @@ export default async function DashboardPage() {
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>Patterns</CardTitle>
+              <CardTitle>Interviews</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">0</div>

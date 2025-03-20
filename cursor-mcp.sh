@@ -1,0 +1,1 @@
+postgresql://postgres.tnzrxljumofdzkkmcddl:Jobs@99123Test@aws-0-ap-south-1.pooler.supabase.com:5432/postgres

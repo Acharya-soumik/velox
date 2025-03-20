@@ -242,7 +242,7 @@ export const CodeEditor = ({
       </div>
 
       {/* Output Console */}
-      <div className="p-4 bg-background border-t">
+      <div className="p-4 bg-background border-t overflow-scroll">
         {" "}
         {/* Using theme background */}
         <div className="flex items-center justify-between mb-2">
@@ -258,7 +258,7 @@ export const CodeEditor = ({
             </Button>
           )}
         </div>
-        <div className="bg-muted rounded-md p-3 font-mono text-sm">
+        <div className="bg-muted rounded-md p-3 font-mono text-sm overflow-scroll">
           <div className="max-h-[200px] overflow-y-auto">
             {output ? (
               <div className="space-y-1">
